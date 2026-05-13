@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}— Analyse{% endblock %}
+{% block content %}
+
+<div class="page-hdr">
+  <div>
+    <h1 class="ptitle">🔍 Analyse Email</h1>
+    <p class="psub">Upload a .txt or .eml file, or fill in the email details below</p>
+  </div>
+</div>
+
+<div class="card" style="max-width:780px;">
+  <form method="POST" enctype="multipart/form-data" id="analyseForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Compact Upload Zone -->
+    <div class="drop-zone-small" id="dropZone">
+      <span style="font-size:1.4em;">📎</span>
+      <span style="font-weight:600;">Drop .txt or .eml file here</span>
+      <span class="muted" style="font-size:.82em;">or click to browse</span>
+      <input type="file" name="email_file" id="fileInput"
+             accept=".txt,.eml" style="display:none;">
+      <span id="fileName"
+            style="font-size:.82em;color:var(--green);margin-left:auto;"></span>
+    </div>
+
+    <div class="divider"><span>OR fill in manually</span></div>
+
+    <!-- Quick Fill Buttons -->
+    <div style="margin-bottom:16px;">
+      <p style="font-size:.82em;color:var(--muted);margin-bottom:8px;">
+        ⚡ Quick fill with sample email:
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn bo bs" onclick="fillSample('phishing')">
+          🔴 Phishing Sample
+        </button>
+        <button type="button" class="btn bo bs" onclick="fillSample('safe')">
+          🟢 Safe Sample
+        </button>
+        <button type="button" class="btn bo bs" onclick="fillSample('jobscam')">
+          🟡 Job Scam Sample
+        </button>
+        <button type="button" class="btn bo bs" onclick="clearForm()">
+          🗑 Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Subject -->
+    <div class="fg">
+      <label>📌 Subject</label>
+      <input class="fi" type="text" name="email_subject" id="fSubject"
+             placeholder="Email subject line">
+    </div>
+
+    <!-- From only - no Reply-To -->
+    <div class="fg">
+      <label>👤 From</label>
+      <input class="fi" type="text" name="email_from" id="fFrom"
+             placeholder="sender@domain.com">
+    </div>
+
+    <!-- Email Body -->
+    <div class="fg">
+      <label>📝 Email Body</label>
+      <textarea class="fi" name="email_text" id="fBody"
+                rows="8"
+                placeholder="Paste the email body here..."></textarea>
+    </div>
+
+    <button class="btn bp bfull" type="submit" id="submitBtn">
+      🔍 Run Analysis
+    </button>
+  </form>
+</div>
+
+<!-- What PhishGuard checks -->
+<div class="card info-box" style="max-width:780px;">
+  <h3 style="margin-bottom:14px;font-size:.95em;">🔎 What PhishGuard checks:</h3>
+  <div class="check-grid">
+    <div class="ck">🔗 <strong>URL Analysis</strong><br>
+      <span class="muted">Suspicious domains, shorteners, raw IPs</span></div>
+    <div class="ck">📋 <strong>Header Analysis</strong><br>
+      <span class="muted">Spoofed senders, SPF failures, Reply-To mismatch</span></div>
+    <div class="ck">🔑 <strong>Keyword Matching</strong><br>
+      <span class="muted">Urgency, financial terms, credential requests</span></div>
+    <div class="ck">📎 <strong>Attachment Check</strong><br>
+      <span class="muted">Dangerous file types, double extensions</span></div>
+    <div class="ck">🤖 <strong>AI Explanation</strong><br>
+      <span class="muted">Plain-English summary of findings</span></div>
+    <div class="ck">🧠 <strong>ML Classifier</strong><br>
+      <span class="muted">Machine learning prediction (if trained)</span></div>
+  </div>
+</div>
+
+<script>
+const samples = {
+  phishing: {
+    subject: 'URGENT: Your Bank Account Will Be Suspended',
+    from: 'security@secure-bank-verification-login.com',
+    body: `Dear Customer,
+
+We have detected unusual activity on your bank account.
+Your account will be suspended within 24 hours unless you verify immediately.
+
+Click the link below and login with your username and password:
+http://secure-bank-verification-login.com
+
+Failure to verify may result in permanent account closure.
+
+Thank you,
+Security Team`
+  },
+  safe: {
+    subject: 'Team Meeting Tomorrow at 10am',
+    from: 'john.smith@company.com',
+    body: `Hi team,
+
+Just a reminder that we have our weekly standup meeting tomorrow at 10am in the conference room.
+
+Please bring your project updates and any blockers to discuss.
+
+See you all tomorrow!
+John`
+  },
+  jobscam: {
+    subject: 'Job Opportunity - $5000/month Work From Home',
+    from: 'hr@jobs-hiring-now.xyz',
+    body: `Dear Applicant,
+
+We are pleased to offer you a job position with our company.
+
+Salary: $5000 per month. No interview required. No experience needed.
+Immediate hiring - work from home.
+
+Please send your details:
+- Passport copy
+- Bank account details
+- Date of birth
+
+Respond within 24 hours.
+
+HR Department`
+  }
+};
+
+function fillSample(type) {
+  const s = samples[type];
+  document.getElementById('fSubject').value = s.subject;
+  document.getElementById('fFrom').value    = s.from;
+  document.getElementById('fBody').value    = s.body;
+}
+
+function clearForm() {
+  ['fSubject', 'fFrom', 'fBody'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('fileName').textContent = '';
+  document.getElementById('dropZone').style.borderColor = '';
+}
+</script>
+
+{% endblock %}

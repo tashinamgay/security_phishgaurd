@@ -1,0 +1,47 @@
+<!-- frontend/templates/dashboard/admin_security.html -->
+{% extends "base.html" %}{% block title %}— Security Panel{% endblock %}
+{% block content %}
+<div class="page-hdr">
+  <div><h1 class="ptitle">⚙️ Security Panel</h1>
+    <p class="psub">Login monitoring and suspicious activity detection</p></div>
+</div>
+
+<div class="card">
+  <h3 class="ctitle">⚠️ Failed Login Summary</h3>
+  <table class="tbl">
+    <thead><tr><th>Username</th><th>Failed Attempts</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for f in failed %}
+      <tr>
+        <td>{{ f._id }}</td>
+        <td>{{ f.cnt }}</td>
+        <td><span class="badge {{ 'badge-red' if f.cnt >= 3 else 'badge-green' }}">
+          {{ '🔴 Suspicious' if f.cnt >= 3 else '🟢 Normal' }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="empty">No failed logins recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3 class="ctitle">📋 Recent Login Attempts</h3>
+  <table class="tbl">
+    <thead><tr><th>Username</th><th>IP Address</th><th>Result</th><th>Time</th></tr></thead>
+    <tbody>
+      {% for a in attempts %}
+      <tr>
+        <td>{{ a.username }}</td>
+        <td class="muted">{{ a.ip }}</td>
+        <td><span class="badge {{ 'badge-green' if a.success else 'badge-red' }}">
+          {{ '✅ Success' if a.success else '❌ Failed' }}</span></td>
+        <td class="muted">{{ a.timestamp.strftime('%d %b %Y %H:%M:%S') if a.timestamp else '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty">No login attempts yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

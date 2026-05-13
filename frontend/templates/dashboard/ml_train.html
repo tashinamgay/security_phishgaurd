@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}— ML Classifier{% endblock %}
+{% block content %}
+
+<div class="page-hdr">
+  <div>
+    <h1 class="ptitle">🤖 ML Phishing Classifier</h1>
+    <p class="psub">Train a machine learning model on a phishing email dataset</p>
+  </div>
+</div>
+
+<!-- Model Status -->
+<div class="card">
+  <h3 class="ctitle">Model Status</h3>
+  <p style="margin:12px 0;">
+    {% if model_exists %}
+      <span class="badge badge-green">✅ Model Trained & Active</span>
+      <span class="muted" style="font-size:.85em;margin-left:8px;">
+        Predictions shown on analysis results page
+      </span>
+    {% else %}
+      <span class="badge badge-yellow">⚠️ No Model Trained Yet</span>
+      <span class="muted" style="font-size:.85em;margin-left:8px;">
+        Train a model below to enable ML predictions
+      </span>
+    {% endif %}
+  </p>
+
+  {% if result %}
+    {% if result.error %}
+      <div class="toast toast-danger">❌ Error: {{ result.error }}</div>
+    {% else %}
+      <div class="toast toast-success">
+        ✅ Training complete!
+        Accuracy: <strong>{{ result.accuracy }}</strong> |
+        Samples: {{ result.samples }} |
+        Train: {{ result.train_size }} | Test: {{ result.test_size }}
+        {% if result.note %}<br><small>{{ result.note }}</small>{% endif %}
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<!-- Quick Start with Sample Data -->
+<div class="card" style="border-color:rgba(99,102,241,.3);">
+  <h3 class="ctitle" style="margin-bottom:12px;">⚡ Quick Start — Use Sample Dataset</h3>
+  <p class="muted" style="font-size:.88em;margin-bottom:16px;">
+    Don't have a dataset yet? Use our built-in sample dataset to test the ML classifier instantly.
+    This includes 12 phishing + 12 safe email examples.
+  </p>
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="sample">
+    <button class="btn bp" type="submit">🚀 Train on Sample Data</button>
+  </form>
+</div>
+
+<!-- Upload Real Dataset -->
+<div class="card">
+  <h3 class="ctitle" style="margin-bottom:12px;">📁 Train on Real Dataset</h3>
+  <div class="info-box card" style="margin-bottom:16px;">
+    <h4 style="margin-bottom:8px;font-size:.9em;">📚 Recommended Datasets:</h4>
+    <div class="check-grid">
+      <div class="ck">
+        <strong>Nazario Phishing Corpus</strong><br>
+        <span class="muted">monkey.org/~jose/phishing/</span><br>
+        Real phishing emails collected since 2004
+      </div>
+      <div class="ck">
+        <strong>SpamAssassin Corpus</strong><br>
+        <span class="muted">spamassassin.apache.org</span><br>
+        Spam vs ham email dataset
+      </div>
+      <div class="ck">
+        <strong>Enron Email Dataset</strong><br>
+        <span class="muted">kaggle.com/datasets</span><br>
+        Large real-world email corpus
+      </div>
+      <div class="ck">
+        <strong>Kaggle Phishing Dataset</strong><br>
+        <span class="muted">kaggle.com/datasets</span><br>
+        Search "phishing email dataset"
+      </div>
+    </div>
+  </div>
+
+  <div class="toast toast-info" style="margin-bottom:16px;">
+    📋 CSV format required: two columns named <code>text</code> (email body) and
+    <code>label</code> (phishing or safe)
+  </div>
+
+  <form method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="train">
+    <div class="fg">
+      <label>Upload CSV Dataset</label>
+      <input class="fi" type="file" name="dataset" accept=".csv" required>
+    </div>
+    <button class="btn bp" type="submit">🧠 Train Model</button>
+  </form>
+</div>
+
+<!-- How It Works -->
+<div class="card info-box">
+  <h3 style="margin-bottom:12px;font-size:.95em;">🔬 How the ML Classifier Works:</h3>
+  <div class="check-grid">
+    <div class="ck"><strong>1. Data Loading</strong><br><span class="muted">CSV dataset loaded and cleaned</span></div>
+    <div class="ck"><strong>2. Train/Test Split</strong><br><span class="muted">80% training, 20% testing</span></div>
+    <div class="ck"><strong>3. TF-IDF Vectorizer</strong><br><span class="muted">Converts email text to numbers</span></div>
+    <div class="ck"><strong>4. Naive Bayes</strong><br><span class="muted">Learns phishing word patterns</span></div>
+    <div class="ck"><strong>5. Evaluation</strong><br><span class="muted">Accuracy measured on test set</span></div>
+    <div class="ck"><strong>6. Saved as .pkl</strong><br><span class="muted">Model reused in future analyses</span></div>
+  </div>
+</div>
+
+{% endblock %}

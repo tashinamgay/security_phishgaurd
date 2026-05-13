@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}— Register{% endblock %}
+{% block content %}
+<div class="auth-card">
+
+  <!-- CIHE Logo + App Name -->
+  <div style="display:flex;align-items:center;justify-content:center;
+              gap:10px;margin-bottom:6px;">
+    <img src="{{ url_for('static', filename='css/cihe-logo.png') }}"
+         alt="CIHE"
+         style="width:40px;height:40px;border-radius:8px;object-fit:contain;"
+         onerror="this.style.display='none'">
+    <span style="font-size:1.6em;font-weight:700;">PhishGuard</span>
+  </div>
+  <p class="auth-sub">Create your account</p>
+
+  {% if is_first_user %}
+  <div style="background:rgba(99,102,241,.12);border:1px solid var(--pri);
+              border-radius:8px;padding:12px;margin-bottom:18px;
+              font-size:.82em;color:var(--pri);text-align:left;">
+    👑 <strong>Welcome!</strong> You are the first user —
+    your account will be created as <strong>Admin</strong>.
+  </div>
+  {% else %}
+  <div style="background:rgba(245,158,11,.1);border:1px solid var(--yellow);
+              border-radius:8px;padding:12px;margin-bottom:18px;
+              font-size:.82em;color:var(--yellow);text-align:left;">
+    ⚠️ <strong>Note:</strong> New accounts require admin approval before login.
+  </div>
+  {% endif %}
+
+  <form method="POST" action="{{ url_for('auth.register') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fg">
+      <label>Username</label>
+      <input class="fi" type="text" name="username"
+             placeholder="Choose a username" required>
+    </div>
+    <div class="fg">
+      <label>Email</label>
+      <input class="fi" type="email" name="email"
+             placeholder="your@email.com" required>
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input class="fi" type="password" name="password"
+             placeholder="Min 8 characters" required minlength="8">
+    </div>
+    <button class="btn bp bfull" type="submit">Create Account</button>
+  </form>
+  <p class="auth-link">
+    Already have an account?
+    <a href="{{ url_for('auth.login') }}">Sign in</a>
+  </p>
+</div>
+{% endblock %}

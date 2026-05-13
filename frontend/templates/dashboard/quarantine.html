@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}— Quarantine{% endblock %}
+{% block content %}
+
+<div class="page-hdr">
+  <div>
+    <h1 class="ptitle">🔒 Quarantine</h1>
+    <p class="psub">High-risk emails held for admin review before release</p>
+  </div>
+</div>
+
+<div class="card">
+  {% if quarantined %}
+  <div class="tbl-scroll">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Subject</th>
+        <th>Sender</th>
+        <th>Risk Score</th>
+        <th>Quarantined At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for q in quarantined %}
+      <tr>
+        <td class="muted">{{ loop.index }}</td>
+        <td>
+          <a href="{{ url_for('dashboard.results', aid=q.analysis_id|string) }}"
+             class="bl">
+            {{ q.subject or 'Unknown Subject' }}
+          </a>
+        </td>
+        <td class="muted">{{ q.sender or 'Unknown Sender' }}</td>
+        <td>
+          <span class="badge badge-red">
+            🔴 {{ q.risk_score or 'N/A' }}/100
+          </span>
+        </td>
+        <td class="muted">
+          {{ q.quarantined_at.strftime('%d %b %Y %H:%M') if q.quarantined_at else 'N/A' }}
+        </td>
+        <td>
+          <a href="{{ url_for('dashboard.results', aid=q.analysis_id|string) }}"
+             class="btn bo bs">👁 View</a>
+          <form method="POST"
+                action="{{ url_for('dashboard.release', qid=q._id|string) }}"
+                style="display:inline;"
+                onsubmit="return confirm('Release this email from quarantine?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn bs badge-green" type="submit">
+              ✅ Release
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    ✅ No emails currently in quarantine.
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

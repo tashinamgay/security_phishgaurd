@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}— Login{% endblock %}
+{% block content %}
+<div class="auth-card">
+
+  <!-- CIHE Logo + App Name -->
+  <div style="display:flex;align-items:center;justify-content:center;
+              gap:10px;margin-bottom:6px;">
+    <img src="{{ url_for('static', filename='css/cihe-logo.png') }}"
+         alt="CIHE"
+         style="width:40px;height:40px;border-radius:8px;object-fit:contain;"
+         onerror="this.style.display='none'">
+    <span style="font-size:1.6em;font-weight:700;">PhishGuard</span>
+  </div>
+  <p class="auth-sub">ICT932 — Cybersecurity Project</p>
+
+  <div style="border-top:1px solid var(--bdr);margin:14px 0;"></div>
+  <p style="font-size:.85em;color:var(--muted);margin-bottom:16px;">
+    Sign in to your account
+  </p>
+
+  <form method="POST" action="{{ url_for('auth.login') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fg">
+      <label>Username</label>
+      <input class="fi" type="text" name="username"
+             placeholder="Your username" required autofocus>
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input class="fi" type="password" name="password"
+             placeholder="Your password" required>
+    </div>
+    <button class="btn bp bfull" type="submit">Sign In →</button>
+  </form>
+  <p class="auth-link">
+    No account? <a href="{{ url_for('auth.register') }}">Register here</a>
+  </p>
+</div>
+{% endblock %}

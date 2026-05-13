@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}— Manage Users{% endblock %}
+{% block content %}
+
+<div class="page-hdr">
+  <div>
+    <h1 class="ptitle">👥 Manage Users</h1>
+    <p class="psub">Approve, suspend, delete or change user roles</p>
+  </div>
+  {% if pending_count > 0 %}
+  <div class="toast toast-warning" style="margin:0;">
+    ⚠️ {{ pending_count }} user(s) waiting for approval!
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="tbl-scroll">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td><strong>{{ u.username }}</strong></td>
+        <td class="muted">{{ u.email }}</td>
+        <td>
+          <span class="badge {{ 'badge-purple' if u.role=='admin' else 'badge-blue' }}">
+            {{ '👑 Admin' if u.role == 'admin' else '👤 Analyst' }}
+          </span>
+        </td>
+        <td>
+          <span class="badge
+            {% if u.status == 'active' %}badge-green
+            {% elif u.status == 'pending' %}badge-yellow
+            {% else %}badge-red{% endif %}">
+            {{ u.status | capitalize }}
+          </span>
+        </td>
+        <td class="muted">
+          {{ u.created_at.strftime('%d %b %Y') if u.created_at else 'N/A' }}
+        </td>
+        <td>
+          {% if u._id|string != current_user.id %}
+
+            <!-- Approve pending users -->
+            {% if u.status == 'pending' %}
+            <form method="POST"
+                  action="{{ url_for('auth.approve_user', uid=u._id) }}"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn bs badge-green" type="submit">
+                ✅ Approve
+              </button>
+            </form>
+            {% endif %}
+
+            <!-- Reactivate suspended users -->
+            {% if u.status == 'suspended' %}
+            <form method="POST"
+                  action="{{ url_for('auth.approve_user', uid=u._id) }}"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn bs badge-green" type="submit">
+                ✅ Reactivate
+              </button>
+            </form>
+            {% endif %}
+
+            <!-- Suspend active users -->
+            {% if u.status == 'active' %}
+            <form method="POST"
+                  action="{{ url_for('auth.suspend_user', uid=u._id) }}"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn bs badge-yellow" type="submit"
+                      onclick="return confirm('Suspend this user?')">
+                ⏸ Suspend
+              </button>
+            </form>
+            {% endif %}
+
+            <!-- Change Role toggle admin and analyst -->
+            <form method="POST"
+                  action="{{ url_for('auth.change_role', uid=u._id) }}"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn bs badge-purple" type="submit"
+                      onclick="return confirm('Change this user role?')">
+                {% if u.role == 'admin' %}
+                  👤 Make Analyst
+                {% else %}
+                  👑 Make Admin
+                {% endif %}
+              </button>
+            </form>
+
+            <!-- Delete permanently -->
+            <form method="POST"
+                  action="{{ url_for('auth.delete_user', uid=u._id) }}"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn bs badge-red" type="submit"
+                      onclick="return confirm('Permanently delete this user?')">
+                🗑 Delete
+              </button>
+            </form>
+
+          {% else %}
+            <span class="muted">— (you)</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="empty">No users found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}

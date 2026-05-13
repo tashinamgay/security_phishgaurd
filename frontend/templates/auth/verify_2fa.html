@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}— Verify 2FA{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div style="font-size:2em;text-align:center;margin-bottom:8px;">🔐</div>
+  <h1 class="auth-h1">Two-Factor Authentication</h1>
+  <p class="auth-sub">Enter the 6-digit code from your Google Authenticator app</p>
+
+  <form method="POST" action="{{ url_for('auth.verify_2fa') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fg">
+      <label>Authentication Code</label>
+      <input class="fi otp" type="text" name="token"
+             placeholder="000000" maxlength="6"
+             pattern="\d{6}" required autofocus>
+    </div>
+    <button class="btn bp bfull" type="submit">Verify →</button>
+  </form>
+  <p class="auth-link">
+    <a href="{{ url_for('auth.login') }}">← Back to login</a>
+  </p>
+</div>
+{% endblock %}

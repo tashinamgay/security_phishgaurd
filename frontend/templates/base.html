@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishGuard {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+
+  <!-- Mobile hamburger -->
+  <button class="hamburger" aria-label="Menu">☰</button>
+
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{{ url_for('static', filename='css/cihe-logo.png') }}"
+           alt="CIHE"
+           style="width:30px;height:30px;border-radius:6px;object-fit:contain;"
+           onerror="this.style.display='none'">
+      <span class="brand-name">PhishGuard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('dashboard.index') }}"
+         class="nav-item {% if request.endpoint=='dashboard.index' %}active{% endif %}">
+        <span>📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('dashboard.analyse') }}"
+         class="nav-item {% if request.endpoint=='dashboard.analyse' %}active{% endif %}">
+        <span>🔍</span> Analyse Email
+      </a>
+      <a href="{{ url_for('dashboard.export_csv') }}" class="nav-item">
+        <span>📥</span> Export CSV
+      </a>
+      {% if current_user.role == 'admin' %}
+      <div class="nav-label">Admin</div>
+      <a href="{{ url_for('auth.manage_users') }}"
+         class="nav-item {% if request.endpoint=='auth.manage_users' %}active{% endif %}">
+        <span>👥</span> Manage Users
+      </a>
+      <a href="{{ url_for('dashboard.quarantine') }}"
+         class="nav-item {% if request.endpoint=='dashboard.quarantine' %}active{% endif %}">
+        <span>🔒</span> Quarantine
+      </a>
+      <a href="{{ url_for('dashboard.security_panel') }}"
+         class="nav-item {% if request.endpoint=='dashboard.security_panel' %}active{% endif %}">
+        <span>⚙️</span> Security Panel
+      </a>
+      <a href="{{ url_for('dashboard.ml_train') }}"
+         class="nav-item {% if request.endpoint=='dashboard.ml_train' %}active{% endif %}">
+        <span>🤖</span> ML Classifier
+      </a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-av">{{ current_user.username[0].upper() }}</div>
+        <div>
+          <div class="u-name">{{ current_user.username }}</div>
+          <div class="u-role {{ current_user.role }}">
+            {{ current_user.role | capitalize }}
+          </div>
+        </div>
+      </div>
+      <a href="{{ url_for('auth.setup_2fa') }}" class="nav-item">
+        <span>📱</span> 2FA Settings
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="nav-item nav-logout">
+        <span>🚪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+{% endif %}
+
+<!-- Main content -->
+<div class="{{ 'main' if current_user.is_authenticated else 'auth-bg' }}">
+  <div class="flash-wrap"
+       style="{{ 'max-width:460px;margin:0 auto;' if not current_user.is_authenticated else '' }}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="toast toast-{{ cat }}">
+          {{ msg }}
+          <button class="toast-close"
+                  onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+  {% block content %}{% endblock %}
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

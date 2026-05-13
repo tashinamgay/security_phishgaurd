@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}— 2FA Setup{% endblock %}
+{% block content %}
+<div class="auth-card" style="max-width:460px;">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:2em;margin-bottom:6px;">📱</div>
+    <h1 class="auth-h1">Setup Two-Factor Auth</h1>
+    <p class="auth-sub">Scan the QR code with Google Authenticator</p>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="card info-box" style="margin-bottom:16px;">
+    <p style="font-size:.85em;margin-bottom:10px;">
+      <strong>Step 1:</strong> Download Google Authenticator on your phone
+    </p>
+    <p style="font-size:.85em;">
+      <strong>Step 2:</strong> Tap + and scan this QR code
+    </p>
+  </div>
+
+  <!-- QR Code -->
+  {% if qr_code %}
+  <div style="text-align:center;margin-bottom:20px;">
+    <img src="data:image/png;base64,{{ qr_code }}"
+         alt="2FA QR Code"
+         style="width:180px;height:180px;border-radius:8px;
+                background:#fff;padding:8px;">
+  </div>
+  {% endif %}
+
+  <!-- Step 3 - Enter code -->
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fg">
+      <label>Step 3: Enter the 6-digit code from your app</label>
+      <input class="fi otp" type="text" name="token"
+             placeholder="000000" maxlength="6"
+             pattern="\d{6}" required autofocus>
+    </div>
+    <button class="btn bp bfull" type="submit">✅ Verify & Enable 2FA</button>
+  </form>
+
+  <p style="text-align:center;margin-top:14px;">
+    <a href="{{ url_for('dashboard.index') }}" class="muted"
+       style="font-size:.83em;">Skip for now →</a>
+  </p>
+</div>
+{% endblock %}

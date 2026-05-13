@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}— Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-hdr">
+  <div>
+    <h1 class="ptitle">📊 Dashboard</h1>
+    <p class="psub">Welcome back, {{ current_user.username }} 👋</p>
+  </div>
+  <a href="{{ url_for('dashboard.analyse') }}" class="btn bp">+ Analyse Email</a>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="si">📧</div>
+    <div class="sn">{{ total }}</div>
+    <div class="sl">Total Analysed</div>
+  </div>
+  <div class="stat-card sc-red">
+    <div class="si">🔴</div>
+    <div class="sn">{{ red }}</div>
+    <div class="sl">High Risk</div>
+  </div>
+  <div class="stat-card sc-yellow">
+    <div class="si">🟡</div>
+    <div class="sn">{{ yellow }}</div>
+    <div class="sl">Suspicious</div>
+  </div>
+  <div class="stat-card sc-green">
+    <div class="si">🟢</div>
+    <div class="sn">{{ green }}</div>
+    <div class="sl">Safe</div>
+  </div>
+</div>
+
+<!-- Risk Distribution Chart -->
+{% if total > 0 %}
+<div class="card" style="margin-bottom:18px;">
+  <h3 class="ctitle" style="margin-bottom:14px;">📊 Risk Distribution</h3>
+  <div style="display:flex;gap:6px;align-items:center;height:32px;">
+    {% if red > 0 %}
+    <div style="background:var(--red);height:100%;border-radius:6px;
+                width:{{ (red/total*100)|round }}%;min-width:36px;
+                display:flex;align-items:center;justify-content:center;
+                font-size:.75em;color:#fff;font-weight:700;">
+      {{ red }} RED
+    </div>
+    {% endif %}
+    {% if yellow > 0 %}
+    <div style="background:var(--yellow);height:100%;border-radius:6px;
+                width:{{ (yellow/total*100)|round }}%;min-width:50px;
+                display:flex;align-items:center;justify-content:center;
+                font-size:.75em;color:#1a1a1a;font-weight:700;">
+      {{ yellow }} YELLOW
+    </div>
+    {% endif %}
+    {% if green > 0 %}
+    <div style="background:var(--green);height:100%;border-radius:6px;
+                width:{{ (green/total*100)|round }}%;min-width:40px;
+                display:flex;align-items:center;justify-content:center;
+                font-size:.75em;color:#fff;font-weight:700;">
+      {{ green }} SAFE
+    </div>
+    {% endif %}
+  </div>
+  <p class="muted" style="font-size:.78em;margin-top:8px;">
+    {{ total }} total —
+    {{ (red/total*100)|round }}% high risk,
+    {{ (yellow/total*100)|round }}% suspicious,
+    {{ (green/total*100)|round }}% safe
+  </p>
+</div>
+{% endif %}
+
+<!-- Analysis History Table -->
+<div class="card">
+  <div class="card-hdr">
+    <h2 class="ctitle">📋 Analysis History</h2>
+    <a href="{{ url_for('dashboard.export_csv') }}" class="btn bo">⬇ Export CSV</a>
+  </div>
+  <div class="tbl-scroll">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Subject</th>
+        <th>Sender</th>
+        <th>Risk</th>
+        <th>Score</th>
+        <th>URLs</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in analyses %}
+      <tr>
+        <td class="muted">{{ loop.index }}</td>
+        <td>{{ (a.email_subject or 'N/A')[:45] }}</td>
+        <td class="muted">{{ (a.email_sender or 'N/A')[:35] }}</td>
+        <td>
+          <span class="badge
+            {{ 'badge-red' if a.risk_level=='RED'
+               else ('badge-yellow' if a.risk_level=='YELLOW'
+               else 'badge-green') }}">
+            {{ '🔴' if a.risk_level=='RED'
+               else ('🟡' if a.risk_level=='YELLOW' else '🟢') }}
+            {{ a.risk_level }}
+          </span>
+        </td>
+        <td>
+          <div class="sbar">
+            <div class="sfill sf-{{ a.risk_level.lower() }}"
+                 style="width:{{ a.risk_score }}%"></div>
+          </div>
+          <small>{{ a.risk_score }}/100</small>
+        </td>
+        <td class="muted">{{ a.suspicious_url_count }}/{{ a.url_count }}</td>
+        <td class="muted">
+          {{ a.analysed_at.strftime('%d %b %y') if a.analysed_at else '' }}
+        </td>
+        <td>
+          <a href="{{ url_for('dashboard.results', aid=a._id|string) }}"
+             class="bl">View</a>
+          <a href="{{ url_for('dashboard.export_pdf', aid=a._id|string) }}"
+             class="bl">PDF</a>
+          <form method="POST"
+                action="{{ url_for('dashboard.delete_analysis', aid=a._id|string) }}"
+                style="display:inline;"
+                onsubmit="return confirm('Delete this analysis?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="bl" type="submit"
+                    style="background:none;border:none;cursor:pointer;
+                           color:var(--red);font-size:.83em;">
+              🗑
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" class="empty">
+          No analyses yet.
+          <a href="{{ url_for('dashboard.analyse') }}">Analyse your first email →</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{% endblock %}
