@@ -19,7 +19,7 @@ csrf          = CSRFProtect()
 login_manager = LoginManager()
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(
         __name__,
         template_folder=os.path.join('..', 'frontend', 'templates'),
@@ -27,13 +27,17 @@ def create_app():
     )
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-change-me')
     mongo_uri = os.getenv('MONGO_URI', '')
+    if test_config:
+        app.config.update(test_config)
+        mongo_uri = app.config.get('MONGO_URI', mongo_uri)
     if not mongo_uri:
         raise RuntimeError("\n❌ MONGO_URI not set! Copy .env.example to .env\n")
     app.config['MONGO_URI'] = mongo_uri
     # 16MB upload limit — needed for ML dataset CSV uploads
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-    # Disable CSRF for API testing with Postman
-    app.config['WTF_CSRF_ENABLED'] = False
+    # Keep CSRF enabled for browser forms. JSON API endpoints are exempted
+    # below so Postman/API testing still works without weakening every route.
+    app.config.setdefault('WTF_CSRF_ENABLED', True)
 
     mongo.init_app(app)
     bcrypt.init_app(app)
@@ -41,8 +45,11 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
 
-    from src.auth.routes import auth_bp
-    from src.dashboard.routes import dashboard_bp
+    from src.auth.routes import auth_bp, api_login, api_register
+    from src.dashboard.routes import dashboard_bp, api_analyse
+    csrf.exempt(api_login)
+    csrf.exempt(api_register)
+    csrf.exempt(api_analyse)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
 
@@ -63,4 +70,5 @@ if __name__ == '__main__':
     print("\n🛡️  PhishGuard starting...")
     print("📡  Connecting to MongoDB Atlas...")
     print("🌐  Open your browser at: http://localhost:5000\n")
-    app.run(debug=True)
+    debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug_mode)

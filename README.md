@@ -118,3 +118,27 @@ python -m locust -f locustfile.py --host=http://localhost:5000
 ```
 Push to GitHub → Build → Bandit SAST → Safety Check → pytest → Deploy
 ```
+ 
+## DevSecOps Evidence
+
+The project includes evidence files for the ICT932 DevSecOps marking criteria:
+
+- `docs/devsecops_changes.md` - security fixes and pipeline improvements
+- `docs/architecture.md` - system architecture and security architecture
+- `docs/threat_model.md` - STRIDE threat model and OWASP mapping
+- `docs/devsecops_pipeline.md` - CI/CD pipeline stages and evidence mapping
+- `docs/security_testing_results.md` - Bandit, pip-audit, pytest, and OWASP Top 10 mapping
+- `docs/incident_response.md` - failed-login incident response simulation
+- `docs/testing/pytest_coverage.txt` - pytest and coverage output
+- `docs/security/bandit_report.txt` - SAST report
+- `docs/security/pip_audit_report.json` - dependency scan report
+- `docs/screenshots/` - screenshot-style evidence images for the report appendix
+
+Current verified local result:
+
+```text
+56 tests passed
+47% total coverage
+Bandit high-severity scan: 0 high issues
+pip-audit: 0 known vulnerable dependencies
+```

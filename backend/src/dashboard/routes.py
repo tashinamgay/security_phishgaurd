@@ -201,6 +201,9 @@ def export_pdf(aid):
     if not record:
         flash('Not found.', 'danger')
         return redirect(url_for('dashboard.index'))
+    if current_user.role != 'admin' and str(record['user_id']) != current_user.id:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('dashboard.index'))
     return Response(generate_pdf(record),
                     mimetype='application/pdf',
                     headers={'Content-Disposition':

@@ -8,12 +8,11 @@ from app import create_app
 
 @pytest.fixture
 def client():
-    app = create_app()
-    app.config.update(
-        TESTING=True,
-        WTF_CSRF_ENABLED=False,
-        MONGO_URI='mongodb://localhost:27017/phishguard_test'
-    )
+    app = create_app({
+        'TESTING': True,
+        'WTF_CSRF_ENABLED': False,
+        'MONGO_URI': 'mongodb://localhost:27017/phishguard_test',
+    })
     with app.test_client() as c:
         yield c
 
